@@ -8,7 +8,7 @@ Notes:
 3) If you are running on Apple silicon (ARM 64) CPU, refer to below objdump command for inspecting NEON vector instuctions. 
 
 ```
-brew install llvm libomp
+brew install cmake llvm libomp
 export CC=/opt/homebrew/opt/llvm/bin/clang
 export CXX=/opt/homebrew/opt/llvm/bin/clang++
 export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
@@ -17,6 +17,6 @@ cd mp1
 mkdir build
 cd build
 cmake ..
-clang++ -march=native -ffast-math -fopenmp ../cpu/gemm_cpu.cpp -L/opt/homebrew/opt/llvm/lib  -o mp1_cpu 
+$CXX -march=native -ffast-math -fopenmp ../cpu/gemm_cpu.cpp -L/opt/homebrew/opt/llvm/lib -o mp1_cpu
 objdump -d ./mp1_cpu | grep -E "ld1|st1|fmla|fadd|fmul|v[0-9]"
 ```
