@@ -3,14 +3,14 @@
 
 #define NUM_RUNS 10
 
-#define CUDA_CHECK(func)                                                     	   \
-	do {                                                                           \
-		cudaError_t status = (func);                                               \
-		if (status != cudaSuccess) {                                               \
-			printf("CUDA API failed at line %d with error: %s (%d)\n", __LINE__,   \
-				cudaGetErrorString(status), status);                               \
-			exit(EXIT_FAILURE);                                                    \
-		}                                                                          \
+#define CUDA_CHECK(func)                                                    \
+	do {                                                                      \
+		cudaError_t status = (func);                                            \
+		if (status != cudaSuccess) {                                            \
+			printf("CUDA API failed at line %d with error: %s (%d)\n", __LINE__,  \
+				cudaGetErrorString(status), status);                                \
+			exit(EXIT_FAILURE);                                                   \
+		}                                                                       \
 	} while (0)
 
 #define CHECK(name) \
@@ -91,7 +91,7 @@ __global__ void gemm_gpu_o0_kernel(float* A, float* B, float *C, int M, int N, i
 				}
 			}
 		}
-    }
+  }
 }
 
 void gemm_gpu_o0(float* A, float* B, float* C, int M, int N, int K)
@@ -120,18 +120,75 @@ void gemm_gpu_o1(float* A, float* B, float* C, int M, int N, int K)
 	gemm_gpu_o1_kernel<<<gridSize, blockSize>>>(A, B, C, M, N, K);
 }
 
+#define TS 16
 __global__ void gemm_gpu_o2_kernel(float* A, float* B, float *C, int M, int N, int K) {
+  int tx = threadIdx.x, ty = threadIdx.y;
+  int bx = blockIdx.x, by = blockIdx.y;
+
+  int i = by * TS + ty;
+  int j = bx * TS + tx;
+
+  __shared__ float TileA[TS][TS];
+  __shared__ float TileB[TS][TS];
+
+  float sum = 0.0;
+  for (int kk = 0; kk < K; kk += TS) {
+    TileA[ty][tx] = (i < M && (kk + tx) < K) ? A[i * K + (kk + tx)] : 0.0;
+    TileB[ty][tx] = ((kk + ty) < K && j < N) ? B[(kk + ty) * N + j] : 0.0;
+    __syncthreads();
+
+    for (int k = 0; k < TS; k++) {
+      sum += TileA[ty][k] * TileB[k][tx];
+    }
+    __syncthreads();
+  }
+
+  if (i < M && j < N) {
+    C[i * N + j] = sum;
+  }
 }
 void gemm_gpu_o2(float* A, float* B, float* C, int M, int N, int K)
 {
 	// Init block and grid size
+  dim3 blockSize(TS, TS);
+	dim3 gridSize(ceil(N / (float) TS), ceil(M / (float) TS));
+	gemm_gpu_o2_kernel<<<gridSize, blockSize>>>(A, B, C, M, N, K);
 }
 
+#undef TS
+#define TS 16
 __global__ void gemm_gpu_o3_kernel(float* A, float* B, float *C, int M, int N, int K) {
+  int tx = threadIdx.x, ty = threadIdx.y;
+  int bx = blockIdx.x, by = blockIdx.y;
+
+  int i = by * TS + ty;
+  int j = bx * TS + tx;
+
+  __shared__ float TileA[TS][TS];
+  __shared__ float TileB[TS][TS];
+
+  float sum = 0.0;
+  for (int kk = 0; kk < K; kk += TS) {
+    TileA[ty][tx] = (i < M && (kk + tx) < K) ? A[i * K + (kk + tx)] : 0.0;
+    TileB[ty][tx] = ((kk + ty) < K && j < N) ? B[(kk + ty) * N + j] : 0.0;
+    __syncthreads();
+
+    for (int k = 0; k < TS; k++) {
+      sum += TileA[ty][k] * TileB[k][tx];
+    }
+    __syncthreads();
+  }
+
+  if (i < M && j < N) {
+    C[i * N + j] = sum;
+  }
 }
 void gemm_gpu_o3(float* A, float* B, float* C, int M, int N, int K)
 {
 	// Init block and grid size
+  dim3 blockSize(TS, TS);
+	dim3 gridSize(ceil(N / (float) TS), ceil(M / (float) TS));
+	gemm_gpu_o3_kernel<<<gridSize, blockSize>>>(A, B, C, M, N, K);
 }
 
 
@@ -146,7 +203,6 @@ int main(int argc, char* argv[]) {
 	int N = atoi(argv[2]);
 	int K = atoi(argv[3]);
 
-	// int runs = atoi(argv[3]);
 	float* A = new float[M * K]();
 	float* B = new float[K * N]();
 	float* C = new float[M * N]();
@@ -155,7 +211,7 @@ int main(int argc, char* argv[]) {
 	fillRandom(B, K * N);
 
 	/// GPU Implementation
-        // Check if implementation is correct
+  // Check if implementation is correct
 	auto ref = Ref();
 	float* refC = new float[Ref::M * Ref::N]();
  	CHECK(gemm_gpu_o0)
