@@ -102,12 +102,22 @@ void gemm_gpu_o0(float* A, float* B, float* C, int M, int N, int K)
 	gemm_gpu_o0_kernel<<<gridSize, blockSize>>>(A, B, C, M, N, K);
 }
 
-// The scafolding for optimized GEMM implementations
 __global__ void gemm_gpu_o1_kernel(float* A, float* B, float *C, int M, int N, int K) {
+	int i = blockIdx.y * blockDim.y + threadIdx.y;
+  int j = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if (i < M && j < N) {
+    for (int k = 0; k < K; k++) {
+      C[i * N + j] += A[i * K + k] * B[k * N + j];
+    }
+  }
 }
 void gemm_gpu_o1(float* A, float* B, float* C, int M, int N, int K)
 {
 	// Init block and grid size
+	dim3 blockSize(16, 16);
+	dim3 gridSize(ceil(N / 16.0), ceil(M / 16.0));
+	gemm_gpu_o1_kernel<<<gridSize, blockSize>>>(A, B, C, M, N, K);
 }
 
 __global__ void gemm_gpu_o2_kernel(float* A, float* B, float *C, int M, int N, int K) {
