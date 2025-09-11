@@ -1,0 +1,8 @@
+checking gemm_cpu_o0
+checking gemm_cpu_o1
+checking gemm_cpu_o2
+checking gemm_cpu_o3
+Time taken for GEMM (CPU,gemm_cpu_o0): 4.56893ms
+Time taken for GEMM (CPU,gemm_cpu_o1): 2.30759ms
+Time taken for GEMM (CPU,gemm_cpu_o2): 2.13045ms
+Time taken for GEMM (CPU,gemm_cpu_o3): 0.54101ms
