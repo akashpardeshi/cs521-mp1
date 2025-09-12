@@ -1,7 +1,7 @@
 #include "../include/utils.h"
 #include <cuda_runtime.h>
 
-#define NUM_RUNS 10
+#define NUM_RUNS 2
 
 #define CUDA_CHECK(func)                                                    \
 	do {                                                                      \
@@ -120,7 +120,7 @@ void gemm_gpu_o1(float* A, float* B, float* C, int M, int N, int K)
 	gemm_gpu_o1_kernel<<<gridSize, blockSize>>>(A, B, C, M, N, K);
 }
 
-#define TS 16
+#define TS 8
 __global__ void gemm_gpu_o2_kernel(float* A, float* B, float *C, int M, int N, int K) {
   int tx = threadIdx.x, ty = threadIdx.y;
   int bx = blockIdx.x, by = blockIdx.y;

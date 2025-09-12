@@ -37,5 +37,26 @@ def scaling_cpu():
     ax.plot(x, times, 'o-')
     plt.show()
 
+def ablation_gpu():
+    labels = ['Naive', 'O1', 'O2', 'O3']
+
+    times_100 = [64.8592, 0.026224, 0.014208, 0.014896]
+    times_1000 = [151350, 7.68019, 4.65174, 2.90034]
+
+    speedup_100 = [times_100[0] / t for t in times_100]
+    speedup_1000 = [times_1000[0] / t for t in times_1000]
+
+    grouped_bar_chart(labels, speedup_100, speedup_1000)
+
+def scaling_gpu():
+    x = [100, 1000, 5000, 10000]
+    times = [0.014896, 2.90034, 438.898, 3837.84]
+
+    fig, ax = plt.subplots()
+    ax.plot(x, times, 'o-')
+    plt.show()
+
 # ablation_cpu()
-scaling_cpu()
+# scaling_cpu()
+# ablation_gpu()
+scaling_gpu()

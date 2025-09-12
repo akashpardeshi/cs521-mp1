@@ -1,0 +1,7 @@
+checking gemm_gpu_o0
+checking gemm_gpu_o1
+checking gemm_gpu_o2
+checking gemm_gpu_o3
+Time taken for GEMM (GPU, gemm_gpu_o1): 10114ms
+Time taken for GEMM (GPU, gemm_gpu_o2): 7101.94ms
+Time taken for GEMM (GPU, gemm_gpu_o3): 3837.84ms
