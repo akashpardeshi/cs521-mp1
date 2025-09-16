@@ -39,12 +39,15 @@ def ablation_cpu():
 
 def scaling_plot(runtimes, platform):
     x = [100, 1000, 5000, 10000]
+    cublas = [0.363248, 1.09712, 41.8807, 473.379]
 
     fig, ax = plt.subplots()
     ax.set_title(f'Scalability of {platform} Implementation')
     ax.set_xlabel('Matrix Size')
     ax.set_ylabel('Runtime (ms)')
-    ax.plot(x, runtimes, 'o-')
+    ax.plot(x, runtimes, 'o-', label='O4' if platform == 'CPU' else 'O3')
+    if platform == 'GPU':
+        ax.plot(x, cublas, 'o-', label='cuBLAS sgemm')
 
     # beautify
     ax.set_yscale('log')
@@ -53,6 +56,7 @@ def scaling_plot(runtimes, platform):
     ax.minorticks_on()
     ax.tick_params(which='minor', bottom=False, left=True)
 
+    plt.legend()
     plt.show()
 
 def ablation_gpu():

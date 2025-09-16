@@ -1,0 +1,4 @@
+Time taken for GEMM (GPU, gemm_gpu_o3): 0.363248ms
+Time taken for GEMM (GPU, gemm_gpu_o3): 1.09712ms
+Time taken for GEMM (GPU, gemm_gpu_o4): 41.8807ms
+Time taken for GEMM (GPU, gemm_gpu_o4): 473.379ms
